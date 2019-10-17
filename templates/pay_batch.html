@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Pay batch</title>
+{% endblock %}
+
+{% block body %}
+<div class="pay_batch">
+    <h2 style="text-align: center">Pay batch</h2>
+
+    <form action="/pay_batch/" method="POST">
+
+        {% if members|length < 1 %}
+        <h4 style="text-align: center">No members yet.</h4>
+        {% else %}
+        <table>
+            <tr>
+                <th>Member</th>
+                <th>Email</th>
+                <th>Debt</th>
+            </tr>
+            {% for member in members %}
+                <tr>
+                    <td>{{ member.name }}</td>
+                    <td>{{ member.mail }}</td>
+                    <td>{{ member.get_debt() }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+
+        <div class="col">
+            {% if members|length > 0 %}
+            <label for="amount">Paid amount</label>
+            <input type="number" autofocus="autofocus" step="0.01" name="amount" id="amount">
+            <br>
+            {% endif %}
+            <div class="row-fluid">
+                {% if members|length > 0 %}
+                <input type="submit" value="Pay">
+                {% endif %}
+                <a href="/" class="button">Home</a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

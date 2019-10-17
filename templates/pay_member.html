@@ -1,24 +1,30 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<title>Update member</title>
+<title>Pay member</title>
 {% endblock %}
 
 {% block body %}
-<div class="update_member">
-    <h2 style="text-align: center">Update member</h2>
+<div class="pay_member">
+    <h2 style="text-align: center">Pay member</h2>
 
-    <form action="/update_member/{{member.id}}" method="POST">
+    <form action="/pay_member/{{member.id}}" method="POST">
+
+        <table>
+        <tr>
+            <td>{{ member.name }}</td>
+            <td>{{ member.mail }}</td>
+            <td>{{ member.get_debt() }}</td>
+        </tr>
+        </table>
+
         <div class="col">
-            <label for="name">Name</label>
-            <input type="text" name="name" id="name" value="{{member.name}}">
-            <br>
-            <label for="mail">Email</label>
-            <input type="text" name="mail" id="mail" value="{{member.mail}}">
+            <label for="amount">Paid amount</label>
+            <input type="number" autofocus="autofocus" step="0.01" name="amount" id="amount">
             <br>
             <div class="row-fluid">
-                <input type="submit" value="Update Member">
-                <a href="/add_member/" class="button">Back</a>
+                <input type="submit" value="Pay">
+                <a href="/" class="button">Back</a>
             </div>
         </div>
     </form>

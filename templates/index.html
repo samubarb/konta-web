@@ -9,9 +9,11 @@
     <h2 style="text-align: center">Kontability</h2>
 
     <div class="row-fluid align-center">
-        <a href="/add_member" class="button">Members</a>
         <a href="/add_bill" class="button">Bills</a>
-        <a href="/" class="button">Batch pay</a>
+        <a href="/add_member" class="button">Members</a>
+        {% if members|length > 1 %}
+        <a href="/pay_batch" class="button">Batch pay</a>
+        {% endif %}
     </div>
     <br>
 

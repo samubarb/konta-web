@@ -59,6 +59,22 @@ def pay_member(id):
     else:
         return render_template('pay_member.html', member=member)
 
+@app.route('/pay_batch/', methods=['GET', 'POST'])
+def pay_batch():
+    members = Member.query.all()
+
+    if request.method == 'POST':
+        amount = float(request.form['amount'])
+        try:
+            for member in members:
+                member.pay(amount)
+            db.session.commit()
+            return redirect('/')
+        except:
+            return 'There was an issue updating debts.'
+    else:
+        return render_template('pay_batch.html', members=members)
+
 @app.route('/add_bill/', methods=['GET', 'POST'])
 def add_bill():
     if request.method == 'POST':
@@ -68,9 +84,9 @@ def add_bill():
         try:
             db.session.add(new_bill)
             members = Member.query.all()
-            debt_decrease_apiece = float(new_bill.amount) / len(members)
+            debt_increment_apiece = float(new_bill.amount) / len(members)
             for member in members:
-                member.charge_bill(debt_decrease_apiece)
+                member.charge_bill(debt_increment_apiece)
             db.session.commit()
             return redirect('/add_bill/')
         except:
