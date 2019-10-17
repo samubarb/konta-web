@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Kontability</title>
+{% endblock %}
+
+{% block body %}
+<div class="index">
+    <h2 style="text-align: center">Kontability</h2>
+
+    <div class="row-fluid align-center">
+        <a href="/add_member" class="button">Members</a>
+        <a href="/add_bill" class="button">Bills</a>
+        <a href="/" class="button">Batch pay</a>
+    </div>
+    <br>
+
+    {% if members|length < 1 %}
+    <h4 style="text-align: center">Members will be shown here.</h4>
+    {% else %}
+    <table>
+        <tr>
+            <th>Member</th>
+            <th>Email</th>
+            <th>Debt</th>
+            <th>Action</th>
+        </tr>
+        {% for member in members %}
+            <tr>
+                <td>{{ member.name }}</td>
+                <td>{{ member.mail }}</td>
+                <td>{{ member.get_debt() }}</td>
+                <td>
+                    <a href="/pay_member/{{member.id}}">Pay</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+</div>
+{% endblock %}

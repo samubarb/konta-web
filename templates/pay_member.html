@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Update member</title>
+{% endblock %}
+
+{% block body %}
+<div class="update_member">
+    <h2 style="text-align: center">Update member</h2>
+
+    <form action="/update_member/{{member.id}}" method="POST">
+        <div class="col">
+            <label for="name">Name</label>
+            <input type="text" name="name" id="name" value="{{member.name}}">
+            <br>
+            <label for="mail">Email</label>
+            <input type="text" name="mail" id="mail" value="{{member.mail}}">
+            <br>
+            <div class="row-fluid">
+                <input type="submit" value="Update Member">
+                <a href="/add_member/" class="button">Back</a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

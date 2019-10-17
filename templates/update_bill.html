@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Update bill</title>
+{% endblock %}
+
+{% block body %}
+<div class="update_bill">
+    <h2 style="text-align: center">Update bill</h2>
+
+    <form action="/update_bill/{{bill.id}}" method="POST">
+        <div class="col">
+            <label for="description">Description</label>
+            <input type="text" name="description" id="description" value="{{bill.description}}">
+            <br>
+            <label for="amount">Amount</label>
+            <input type="number" autofocus="autofocus" step="0.01" name="amount" id="amount" value="{{bill.amount}}">
+            <br>
+            <div class="row-fluid">
+                <input type="submit" value="Update Bill">
+                <a href="/add_bill/" class="button">Back</a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

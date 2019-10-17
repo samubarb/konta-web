@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Add new member</title>
+{% endblock %}
+
+{% block body %}
+<div class="add_member">
+    <h2 style="text-align: center">Add new member</h2>
+
+    <form action="/add_member/" method="POST">
+        <div class="col">
+            <label for="name">Name</label>
+            <input type="text" autofocus="autofocus" name="name" id="name">
+            <br>
+            <label for="mail">Email</label>
+            <input type="email" name="mail" id="mail">
+            <br>
+            <div class="row-fluid">
+                <input type="submit" value="Add Member">
+                <a href="/" class="button">Home</a>
+            </div>
+        </div>
+    </form>
+
+    {% if members|length < 1 %}
+    <h4 style="text-align: center">No members yet. Create one! :)</h4>
+    {% else %}
+    <table>
+        <tr>
+            <th>Member</th>
+            <th>Email</th>
+            <th>Debt</th>
+            <th>Action</th>
+        </tr>
+        {% for member in members %}
+            <tr>
+                <td>{{ member.name }}</td>
+                <td>{{ member.mail }}</td>
+                <td>{{ member.get_debt() }}</td>
+                <td>
+                    <a href="/pay_member/{{member.id}}">Pay</a>
+                    <br>
+                    <a href="/update_member/{{member.id}}">Update</a>
+                    <br>
+                    <a href="/delete_member/{{member.id}}">Delete</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+</div>
+{% endblock %}
