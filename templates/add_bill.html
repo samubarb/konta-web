@@ -40,6 +40,8 @@
                 <td>{{ bill.date_created.isoformat(sep=' ', timespec='minutes') }}</td>
                 <td>
                     <a href="/update_bill/{{bill.id}}">Update</a>
+                    <br>
+                    <a href="/delete_bill/{{bill.id}}">Delete</a>
                 </td>
             </tr>
         {% endfor %}

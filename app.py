@@ -95,21 +95,36 @@ def add_bill():
         bills = Bill.query.order_by(desc(Bill.date_created)).all()
         return render_template('add_bill.html', bills=bills)
 
+@app.route('/delete_bill/<int:id>', methods=['GET', 'POST'])
+def delete_bill(id):
+    bill_to_delete = Bill.query.get_or_404(id)
+    try:
+        amount = bill_to_delete.amount
+        members = Member.query.all()
+        debt_decrease_apiece = -(float(amount) / len(members))
+        for member in members:
+            member.charge_bill(debt_decrease_apiece)
+        db.session.delete(bill_to_delete)
+        db.session.commit()
+        # flash('Member succesfully deleted')
+        return redirect('/add_bill/')
+    except:
+        return 'There was an issue deleting that bill.'
+
 @app.route('/update_bill/<int:id>', methods=['GET', 'POST'])
 def update_bill(id):
     bill_to_update = Bill.query.get_or_404(id)
 
     if request.method == 'POST':
-        old_amount = bill_to_update.amount
-        bill_to_update.description = request.form['description']
-        bill_to_update.amount = float(request.form['amount'])
-        delta = bill_to_update.amount - old_amount
-
         try:
+            old_amount = bill_to_update.amount
+            bill_to_update.description = request.form['description']
+            bill_to_update.amount = float(request.form['amount'])
+            delta = bill_to_update.amount - old_amount
             members = Member.query.all()
-            debt_decrease_apiece = float(delta) / len(members)
+            debt_increase_apiece = float(delta) / len(members)
             for member in members:
-                member.charge_bill(debt_decrease_apiece)
+                member.charge_bill(debt_increase_apiece)
             db.session.commit()
             return redirect('/add_bill/')
         except:
@@ -121,7 +136,16 @@ def update_bill(id):
 def add_member():
     if request.method == 'POST':
         form = request.form
-        new_member = Member(name=form['name'], mail=form['mail'])
+        
+        name = form['name']
+        if name == '':
+            return redirect('/add_member/')
+        
+        debt = form['debt']
+        if debt == '':
+            debt = 0.0
+        
+        new_member = Member(name=form['name'], mail=form['mail'], debt=debt)
 
         try:
             db.session.add(new_member)
@@ -141,7 +165,7 @@ def delete_member(id):
         db.session.delete(member_to_delete)
         db.session.commit()
         # flash('Member succesfully deleted')
-        return redirect('/')
+        return redirect('/add_member/')
     except:
         return 'There was an issue deleting that member.'
 
@@ -163,4 +187,4 @@ def update_member(id):
 
 
 if __name__ == '__main__':
-    app.run(debug=False, host='0.0.0.0')
+    app.run(debug=True)
