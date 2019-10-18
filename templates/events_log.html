@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Events log</title>
+{% endblock %}
+
+{% block body %}
+<div class="index">
+    <h2 style="text-align: center">Events log</h2>
+
+    <div class="row-fluid align-center">
+        <a href="/" class="button">Home</a>
+    </div>
+    <br>
+
+    {% if logs|length < 1 %}
+    <h4 style="text-align: center">No logs yet.</h4>
+    {% else %}
+    <table>
+        <tr>
+            <th>Description</th>
+            <th>Insertion</th>
+        </tr>
+        {% for log in logs %}
+            <tr>
+                <td>{{ log.description }}</td>
+                <td>{{ log.date_created.isoformat(sep=' ', timespec='minutes') }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+</div>
+{% endblock %}
