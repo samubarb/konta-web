@@ -39,6 +39,75 @@ class Bill(db.Model):
     def __repr__(self):
         return '<Bill %r>' % self.id
 
+class Log(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    description = db.Column(db.String(200), nullable=False)
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return '<Log %r>' % self.id
+
+    @staticmethod
+    def pay(name, amount):
+        desc = name + ' paid €' + str(amount)
+        new_log = Log(description=desc)
+        try:
+            db.session.add(new_log)
+            db.session.commit()
+        except:
+            raise Exception('PayLogException')
+
+    @staticmethod
+    def new_bill(bill):
+        desc = 'Added bill ' + bill.description + ' of €' + str(bill.amount)
+        new_log = Log(description=desc)
+        try:
+            db.session.add(new_log)
+            db.session.commit()
+        except:
+            raise Exception('NewBillLogException')
+
+    @staticmethod
+    def delete_bill(bill):
+        desc = 'Deleted bill ' + bill.description + ' of €' + str(bill.amount)
+        new_log = Log(description=desc)
+        try:
+            db.session.add(new_log)
+            db.session.commit()
+        except:
+            raise Exception('DeleteBillLogException')
+
+    @staticmethod
+    def update_bill(bill):
+        desc = 'Updated bill ' + bill.description + ' of €' + str(bill.amount)
+        new_log = Log(description=desc)
+        try:
+            db.session.add(new_log)
+            db.session.commit()
+        except:
+            raise Exception('UpdateBillLogException')
+
+    @staticmethod
+    def new_member(member):
+        desc = 'Added member ' + member.name + ' with debt of €' + str(member.debt)
+        new_log = Log(description=desc)
+        try:
+            db.session.add(new_log)
+            db.session.commit()
+        except:
+            raise Exception('NewMemberLogException')
+
+    @staticmethod
+    def delete_member(member):
+        desc = 'Deleted member ' + member.name + ' with debt of €' + str(member.get_debt())
+        new_log = Log(description=desc)
+        try:
+            db.session.add(new_log)
+            db.session.commit()
+        except:
+            raise Exception('NewMemberLogException')
+
+
 @app.route('/', methods=['GET'])
 def index():
     members = Member.query.order_by(Member.date_created).all()
@@ -53,6 +122,7 @@ def pay_member(id):
         try:
             member.pay(amount)
             db.session.commit()
+            Log.pay(member.name, amount)
             return redirect('/')
         except:
             return 'There was an issue updating the debt.'
@@ -69,6 +139,7 @@ def pay_batch():
             for member in members:
                 member.pay(amount)
             db.session.commit()
+            Log.pay('Everyone', amount)
             return redirect('/')
         except:
             return 'There was an issue updating debts.'
@@ -88,6 +159,7 @@ def add_bill():
             for member in members:
                 member.charge_bill(debt_increment_apiece)
             db.session.commit()
+            Log.new_bill(new_bill)
             return redirect('/add_bill/')
         except:
             return 'There was an issue adding that bill.'
@@ -106,6 +178,7 @@ def delete_bill(id):
             member.charge_bill(debt_decrease_apiece)
         db.session.delete(bill_to_delete)
         db.session.commit()
+        Log.delete_bill(bill_to_delete)
         # flash('Member succesfully deleted')
         return redirect('/add_bill/')
     except:
@@ -126,6 +199,7 @@ def update_bill(id):
             for member in members:
                 member.charge_bill(debt_increase_apiece)
             db.session.commit()
+            Log.update_bill(bill_to_update)
             return redirect('/add_bill/')
         except:
             return 'There was an issue updating that bill.'
@@ -150,6 +224,7 @@ def add_member():
         try:
             db.session.add(new_member)
             db.session.commit()
+            Log.new_member(new_member)
             return redirect('/add_member/')
         except:
             return 'There was an issue adding that member.'
@@ -160,6 +235,9 @@ def add_member():
 @app.route('/delete_member/<int:id>')
 def delete_member(id):
     member_to_delete = Member.query.get_or_404(id)
+
+    Log.delete_member(member_to_delete)
+
 
     try:
         db.session.delete(member_to_delete)
@@ -185,6 +263,10 @@ def update_member(id):
     else:
         return render_template('update_member.html', member=member_to_update)
 
+@app.route('/events_log/')
+def events_log():
+    logs = Log.query.order_by(desc(Log.date_created)).all()
+    return render_template('events_log.html', logs=logs)
 
 if __name__ == '__main__':
     app.run(debug=True)
