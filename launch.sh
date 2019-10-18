@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/usr/bin/env bash
 
 # Entering virtualenv
 test -f "venv/bin/activate"
@@ -17,4 +17,4 @@ if [ $? == 1 ]; then
 fi
 
 # Launching app
-python3 app.py
+gunicorn -b 0.0.0.0:5000 app:app
