@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import desc
 from datetime import datetime
 import sys
+import urllib.parse
 
 db_name = 'konta.db'
 
@@ -111,7 +112,19 @@ class Log(db.Model):
 @app.route('/', methods=['GET'])
 def index():
     members = Member.query.order_by(Member.date_created).all()
-    return render_template('index.html', members=members)
+    recipients = ''
+    for m in members:
+        recipients += m.mail + ' '
+    subject = 'Affitto + Bollette '
+    body = ''
+    for m in members:
+        body += m.name + ' €' + str(round(m.debt)) + '\n'
+
+    recipients = urllib.parse.quote(recipients)
+    subject = urllib.parse.quote(subject)
+    body = urllib.parse.quote(body)
+
+    return render_template('index.html', members=members, recipients=recipients, subject=subject, body=body)
 
 @app.route('/pay_member/<int:id>', methods=['GET', 'POST'])
 def pay_member(id):
@@ -158,7 +171,7 @@ def add_bill():
             debt_increment_apiece = float(new_bill.amount) / len(members)
             for member in members:
                 member.charge_bill(debt_increment_apiece)
-            db.session.commit()
+            db.session.commit() 
             Log.new_bill(new_bill)
             return redirect('/add_bill/')
         except:

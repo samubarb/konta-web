@@ -39,6 +39,15 @@
             </tr>
         {% endfor %}
     </table>
+
+    <br>
+    <div class="row-fluid align-center">
+        <a class="button" target="_blank"
+        href = "mailto:{{recipients}}
+        ?subject={{subject}} 
+        &body={{body}}">Email</a>
+    </div>
+
     {% endif %}
 </div>
 {% endblock %}
