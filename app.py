@@ -4,6 +4,7 @@ from sqlalchemy import desc
 from datetime import datetime
 import sys
 import urllib.parse
+from datetime import datetime
 
 db_name = 'konta.db'
 
@@ -112,19 +113,44 @@ class Log(db.Model):
 @app.route('/', methods=['GET'])
 def index():
     members = Member.query.order_by(Member.date_created).all()
+    return render_template('index.html', members=members)
+
+def italian_month(num):
+    ita_months = {
+            1  : 'Gennaio',
+            2  : 'Febbraio',
+            3  : 'Marzo',
+            4  : 'Aprile',
+            5  : 'Maggio',
+            6  : 'Giugno',
+            7  : 'Luglio',
+            8  : 'Agosto',
+            9  : 'Settembre',
+            10 : 'Ottobre',
+            11 : 'Novembre',
+            12 : 'Dicembre'
+    }
+    return ita_months.get(num, 'Error.')
+
+@app.route('/email/', methods=['GET'])
+def email():
+    members = Member.query.order_by(Member.date_created).all()
+    now = datetime.now()
     recipients = ''
     for m in members:
         recipients += m.mail + ' '
-    subject = 'Affitto + Bollette '
-    body = ''
+    month = int(now.strftime('%-m'))
+    subject = 'Affitto + Bollette ' + italian_month(month) + now.strftime(' %Y')
+    body = 'Bills payment updated at ' + now.strftime('%c') + '\n'
     for m in members:
         body += m.name + ' €' + str(round(m.debt)) + '\n'
 
     recipients = urllib.parse.quote(recipients)
     subject = urllib.parse.quote(subject)
     body = urllib.parse.quote(body)
-
-    return render_template('index.html', members=members, recipients=recipients, subject=subject, body=body)
+    return redirect('mailto:' + recipients +
+                    '?subject=' + subject +
+                    '&body=' + body)
 
 @app.route('/pay_member/<int:id>', methods=['GET', 'POST'])
 def pay_member(id):
@@ -180,7 +206,7 @@ def add_bill():
         bills = Bill.query.order_by(desc(Bill.date_created)).all()
         return render_template('add_bill.html', bills=bills)
 
-@app.route('/delete_bill/<int:id>', methods=['GET', 'POST'])
+@app.route('/delete_bill/<int:id>', methods=['GET'])
 def delete_bill(id):
     bill_to_delete = Bill.query.get_or_404(id)
     try:
@@ -245,7 +271,7 @@ def add_member():
         members = Member.query.order_by(Member.date_created).all()
         return render_template('add_member.html', members=members)
 
-@app.route('/delete_member/<int:id>')
+@app.route('/delete_member/<int:id>', methods=['GET'])
 def delete_member(id):
     member_to_delete = Member.query.get_or_404(id)
 
@@ -276,7 +302,7 @@ def update_member(id):
     else:
         return render_template('update_member.html', member=member_to_update)
 
-@app.route('/events_log/')
+@app.route('/events_log/', methods=['GET'])
 def events_log():
     logs = Log.query.order_by(desc(Log.date_created)).all()
     return render_template('events_log.html', logs=logs)
