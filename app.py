@@ -141,10 +141,10 @@ def email():
         recipients += m.mail + ' '
     month = int(now.strftime('%-m'))
     subject = 'Affitto + Bollette ' + italian_month(month) + now.strftime(' %Y')
-    body = 'Bills payment updated at ' + now.strftime('%c') + '\n'
+    body = '\n\nBills payment updated at ' + now.strftime('%c') + '\n'
     for m in members:
         body += m.name + ' €' + str(round(m.debt)) + '\n'
-
+    body += '\n\n'
     recipients = urllib.parse.quote(recipients)
     subject = urllib.parse.quote(subject)
     body = urllib.parse.quote(body)
