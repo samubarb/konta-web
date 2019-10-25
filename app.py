@@ -157,7 +157,7 @@ def pay_member(id):
     member = Member.query.get_or_404(id)
 
     if request.method == 'POST':
-        amount = float(request.form['amount'])
+        amount = float(request.form.get('amount'))
         try:
             member.pay(amount)
             db.session.commit()
@@ -173,7 +173,7 @@ def pay_batch():
     members = Member.query.all()
 
     if request.method == 'POST':
-        amount = float(request.form['amount'])
+        amount = float(request.form.get('amount'))
         try:
             for member in members:
                 member.pay(amount)
@@ -189,7 +189,7 @@ def pay_batch():
 def add_bill():
     if request.method == 'POST':
         form = request.form
-        new_bill = Bill(description=form['description'], amount=form['amount'])
+        new_bill = Bill(description=form.get('description'), amount=form.get('amount'))
 
         try:
             db.session.add(new_bill)
@@ -230,8 +230,8 @@ def update_bill(id):
     if request.method == 'POST':
         try:
             old_amount = bill_to_update.amount
-            bill_to_update.description = request.form['description']
-            bill_to_update.amount = float(request.form['amount'])
+            bill_to_update.description = request.form.get('description')
+            bill_to_update.amount = float(request.form.get('amount'))
             delta = bill_to_update.amount - old_amount
             members = Member.query.all()
             debt_increase_apiece = float(delta) / len(members)
@@ -250,15 +250,15 @@ def add_member():
     if request.method == 'POST':
         form = request.form
         
-        name = form['name']
+        name = form.get('name')
         if name == '':
             return redirect('/add_member/')
         
-        debt = form['debt']
+        debt = form.get('debt')
         if debt == '':
             debt = 0.0
         
-        new_member = Member(name=form['name'], mail=form['mail'], debt=debt)
+        new_member = Member(name=form.get('name'), mail=form.get('mail'), debt=debt)
 
         try:
             db.session.add(new_member)
@@ -291,8 +291,8 @@ def update_member(id):
     member_to_update = Member.query.get_or_404(id)
 
     if request.method == 'POST':
-        member_to_update.name = request.form['name']
-        member_to_update.mail = request.form['mail']
+        member_to_update.name = request.form.get('name')
+        member_to_update.mail = request.form.get('mail')
 
         try:
             db.session.commit()
