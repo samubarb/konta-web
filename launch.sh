@@ -5,7 +5,7 @@ test -f "venv/bin/activate"
 if [ $? == 1 ]; then
     python3 -m venv venv
 fi
-. ./venv/bin/activate
+source venv/bin/activate
 
 # Checking dependencies
 pip3 install -r requirements.txt --upgrade

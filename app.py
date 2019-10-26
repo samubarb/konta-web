@@ -5,6 +5,10 @@ from datetime import datetime
 import sys
 import urllib.parse
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import LoginManager, UserMixin, current_user, login_user, login_required
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField, BooleanField
 
 db_name = 'konta.db'
 
@@ -12,6 +16,30 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_name
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+app.secret_key = open('secret_key', 'rb').read()
+login = LoginManager(app)
+
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), index=True, unique=True)
+    password_hash = db.Column(db.String(128))
+
+    def __repr__(self):
+        return '<User {}>'.format(self.id)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+@login.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+
+@login.unauthorized_handler
+def unauthorized_callback():
+    return redirect('/login')
 
 class Member(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -21,7 +49,7 @@ class Member(db.Model):
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
-        return '<Member %r>' % self.id
+        return '<Member {}>'.format(self.id)
 
     def pay(self, amount):
         self.debt -= float(amount)
@@ -30,7 +58,10 @@ class Member(db.Model):
         self.debt += float(amount)
 
     def get_debt(self):
-        return str("%.3f" % round(self.debt, 3))
+        return str('{0:.3f}'.format(round(self.debt, 3)))
+
+    def get_int_debt(self):
+        return str(round(self.debt))
 
 class Bill(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -39,7 +70,7 @@ class Bill(db.Model):
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
-        return '<Bill %r>' % self.id
+        return '<Bill {}>'.format(self.id)
 
 class Log(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -47,7 +78,7 @@ class Log(db.Model):
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
-        return '<Log %r>' % self.id
+        return '<Log {}>'.format(self.id)
 
     @staticmethod
     def pay(name, amount):
@@ -109,8 +140,32 @@ class Log(db.Model):
         except:
             raise Exception('NewMemberLogException')
 
+class LoginForm(FlaskForm):
+    username = StringField('Username')
+    password = PasswordField('Password')
+    remember_me = BooleanField('Remember Me')
+    submit = SubmitField('Submit')
 
-@app.route('/', methods=['GET'])
+
+@app.route('/login/', methods=['GET', 'POST'])
+def login():
+    print('BEGIN LOGIN')
+    if current_user.is_authenticated:
+        print('ALREADY AUTHENTICATED')
+        return redirect(url_for('index'))
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        if user is None or not user.check_password(form.password.data):
+            # flash('Invalid username or password')
+            return redirect(url_for('login'))
+        login_user(user, remember=form.remember_me.data)
+        print('CAZZO')
+        return redirect(url_for('index'))
+    return render_template('login.html', title='Sign In', form=form)
+
+@app.route('/', methods=['GET', 'POST'])
+@login_required
 def index():
     members = Member.query.order_by(Member.date_created).all()
     return render_template('index.html', members=members)
@@ -133,6 +188,7 @@ def italian_month(num):
     return ita_months.get(num, 'Error.')
 
 @app.route('/email/', methods=['GET'])
+@login_required
 def email():
     members = Member.query.order_by(Member.date_created).all()
     now = datetime.now()
@@ -143,7 +199,7 @@ def email():
     subject = 'Affitto + Bollette ' + italian_month(month) + now.strftime(' %Y')
     body = '\n\nBills payment updated at ' + now.strftime('%c') + '\n'
     for m in members:
-        body += m.name + ' €' + str(round(m.debt)) + '\n'
+        body += m.name + ' €' + m.get_int_debt() + '\n'
     body += '\n\n'
     recipients = urllib.parse.quote(recipients)
     subject = urllib.parse.quote(subject)
@@ -153,6 +209,7 @@ def email():
                     '&body=' + body)
 
 @app.route('/pay_member/<int:id>', methods=['GET', 'POST'])
+@login_required
 def pay_member(id):
     member = Member.query.get_or_404(id)
 
@@ -169,6 +226,7 @@ def pay_member(id):
         return render_template('pay_member.html', member=member)
 
 @app.route('/pay_batch/', methods=['GET', 'POST'])
+@login_required
 def pay_batch():
     members = Member.query.all()
 
@@ -186,6 +244,7 @@ def pay_batch():
         return render_template('pay_batch.html', members=members)
 
 @app.route('/add_bill/', methods=['GET', 'POST'])
+@login_required
 def add_bill():
     if request.method == 'POST':
         form = request.form
@@ -207,6 +266,7 @@ def add_bill():
         return render_template('add_bill.html', bills=bills)
 
 @app.route('/delete_bill/<int:id>', methods=['GET'])
+@login_required
 def delete_bill(id):
     bill_to_delete = Bill.query.get_or_404(id)
     try:
@@ -224,6 +284,7 @@ def delete_bill(id):
         return 'There was an issue deleting that bill.'
 
 @app.route('/update_bill/<int:id>', methods=['GET', 'POST'])
+@login_required
 def update_bill(id):
     bill_to_update = Bill.query.get_or_404(id)
 
@@ -246,6 +307,7 @@ def update_bill(id):
         return render_template('update_bill.html', bill=bill_to_update)
 
 @app.route('/add_member/', methods=['GET', 'POST'])
+@login_required
 def add_member():
     if request.method == 'POST':
         form = request.form
@@ -272,6 +334,7 @@ def add_member():
         return render_template('add_member.html', members=members)
 
 @app.route('/delete_member/<int:id>', methods=['GET'])
+@login_required
 def delete_member(id):
     member_to_delete = Member.query.get_or_404(id)
 
@@ -287,6 +350,7 @@ def delete_member(id):
         return 'There was an issue deleting that member.'
 
 @app.route('/update_member/<int:id>', methods=['GET', 'POST'])
+@login_required
 def update_member(id):
     member_to_update = Member.query.get_or_404(id)
 
@@ -303,6 +367,7 @@ def update_member(id):
         return render_template('update_member.html', member=member_to_update)
 
 @app.route('/events_log/', methods=['GET'])
+@login_required
 def events_log():
     logs = Log.query.order_by(desc(Log.date_created)).all()
     return render_template('events_log.html', logs=logs)
