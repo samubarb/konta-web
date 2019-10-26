@@ -149,9 +149,7 @@ class LoginForm(FlaskForm):
 
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
-    print('BEGIN LOGIN')
     if current_user.is_authenticated:
-        print('ALREADY AUTHENTICATED')
         return redirect(url_for('index'))
     form = LoginForm()
     if form.validate_on_submit():
@@ -160,7 +158,6 @@ def login():
             # flash('Invalid username or password')
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
-        print('CAZZO')
         return redirect(url_for('index'))
     return render_template('login.html', title='Sign In', form=form)
 

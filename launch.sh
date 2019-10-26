@@ -16,5 +16,8 @@ if [ $? == 1 ]; then
     python3 setup.py
 fi
 
+# Creating secret key
+python -c 'import os; print(os.urandom(16))' > secret_key
+
 # Launching app
 gunicorn -b 0.0.0.0:5000 app:app
