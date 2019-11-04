@@ -6,7 +6,7 @@ import sys
 import urllib.parse
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import LoginManager, UserMixin, current_user, login_user, login_required
+from flask_login import LoginManager, UserMixin, current_user, login_user, login_required, logout_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField
 
@@ -160,6 +160,13 @@ def login():
         login_user(user, remember=form.remember_me.data)
         return redirect(url_for('index'))
     return render_template('login.html', title='Sign In', form=form)
+
+@app.route('/logout/', methods=['GET'])
+@login_required
+def logout():
+    logout_user()
+    return redirect('/login/')
+
 
 @app.route('/', methods=['GET', 'POST'])
 @login_required
