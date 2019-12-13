@@ -25,14 +25,14 @@
     <table>
         <tr>
             <th>Member</th>
-            <th>Email</th>
+            <!-- <th>Email</th> -->
             <th>Debt</th>
             <th>Action</th>
         </tr>
         {% for member in members %}
             <tr>
                 <td>{{ member.name }}</td>
-                <td>{{ member.mail }}</td>
+                <!-- <td>{{ member.mail }}</td> -->
                 <td>{{ member.get_debt() }}</td>
                 <td>
                     <a href="/pay_member/{{member.id}}">Pay</a>
@@ -46,6 +46,5 @@
         <a class="button" target="_blank" href = "/email">Email</a>
     </div>
     {% endif %}
-
 </div>
 {% endblock %}

@@ -198,7 +198,7 @@ def email():
     now = datetime.now()
     recipients = ''
     for m in members:
-        recipients += m.mail + ' '
+        recipients += m.mail + ','
     month = int(now.strftime('%-m'))
     subject = 'Affitto + Bollette ' + italian_month(month) + now.strftime(' %Y')
     body = '\n\nBills payment updated at ' + now.strftime('%c') + '\n'
