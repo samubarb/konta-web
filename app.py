@@ -19,6 +19,12 @@ db = SQLAlchemy(app)
 app.secret_key = open('secret_key', 'rb').read()
 login = LoginManager(app)
 
+def currency_to_string(amount, precision = 2):
+    try:
+        return "{:.{}f}".format(amount, precision)
+    except:
+            raise Exception('ConvertToStringException')
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), index=True, unique=True)
@@ -58,7 +64,8 @@ class Member(db.Model):
         self.debt += float(amount)
 
     def get_debt(self):
-        return str('{0:.3f}'.format(round(self.debt, 3)))
+        return currency_to_string(self.debt)
+        # return str('{0:.3f}'.format(round(self.debt, 3)))
 
     def get_int_debt(self):
         return str(round(self.debt))
@@ -82,7 +89,7 @@ class Log(db.Model):
 
     @staticmethod
     def pay(name, amount):
-        desc = name + ' paid €' + str(amount)
+        desc = name + ' paid €' + currency_to_string(amount)
         new_log = Log(description=desc)
         try:
             db.session.add(new_log)
@@ -92,7 +99,7 @@ class Log(db.Model):
 
     @staticmethod
     def new_bill(bill):
-        desc = 'Added bill ' + bill.description + ' of €' + str(bill.amount)
+        desc = 'Added bill ' + bill.description + ' of €' + currency_to_string(bill.amount)
         new_log = Log(description=desc)
         try:
             db.session.add(new_log)
@@ -102,7 +109,7 @@ class Log(db.Model):
 
     @staticmethod
     def delete_bill(bill):
-        desc = 'Deleted bill ' + bill.description + ' of €' + str(bill.amount)
+        desc = 'Deleted bill ' + bill.description + ' of €' + currency_to_string(bill.amount)
         new_log = Log(description=desc)
         try:
             db.session.add(new_log)
@@ -112,7 +119,7 @@ class Log(db.Model):
 
     @staticmethod
     def update_bill(bill):
-        desc = 'Updated bill ' + bill.description + ' of €' + str(bill.amount)
+        desc = 'Updated bill ' + bill.description + ' of €' + currency_to_string(bill.amount)
         new_log = Log(description=desc)
         try:
             db.session.add(new_log)
@@ -122,7 +129,7 @@ class Log(db.Model):
 
     @staticmethod
     def new_member(member):
-        desc = 'Added member ' + member.name + ' with debt of €' + str(member.debt)
+        desc = 'Added member ' + member.name + ' with debt of €' + currency_to_string(member.debt)
         new_log = Log(description=desc)
         try:
             db.session.add(new_log)
@@ -132,7 +139,7 @@ class Log(db.Model):
 
     @staticmethod
     def delete_member(member):
-        desc = 'Deleted member ' + member.name + ' with debt of €' + str(member.get_debt())
+        desc = 'Deleted member ' + member.name + ' with debt of €' + member.get_debt()
         new_log = Log(description=desc)
         try:
             db.session.add(new_log)
