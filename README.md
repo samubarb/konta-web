@@ -35,6 +35,12 @@ Enable the service through:
 systemctl --user enable kontability.service
 ```
 
+Using *[lingering][lingering]* to permits user's systemd unit to run without requiring login:
+
+```
+# loginctl enable-linger <username>
+```
+
 Reboot and you should the webapp up and running.
 
 ## Troubleshooting
@@ -56,3 +62,6 @@ An issue could come up when your hosting machine is not listening http traffic a
 
 This could be resolved running `sudo iptables -I INPUT -p tcp --dport 5000 -j ACCEPT` on the machine running Kontability.
 This solution is not permanent after reboot.
+
+<!-- Links -->
+[lingering]: https://wiki.archlinux.org/index.php/Systemd/User#Automatic_start-up_of_systemd_user_instances
