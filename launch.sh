@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-wrk_dir="/home/ubuntu/konta-web"
+wrk_dir="."
 
 # Entering virtualenv
 echo "Setting up virtualenv..."
