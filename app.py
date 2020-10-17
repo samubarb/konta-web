@@ -23,7 +23,7 @@ def currency_to_string(amount, precision = 2):
     try:
         return "{:.{}f}".format(amount, precision)
     except:
-            raise Exception('ConvertToStringException')
+        raise Exception('ConvertToStringException')
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
