@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Add new house</title>
+{% endblock %}
+
+{% block body %}
+<div class="settings">
+    <h2 style="text-align: center">Add new house</h2>
+
+    <form action="/add_house/" method="POST">
+        <div class="col">
+            <label for="name">Name</label>
+            <input type="text" autofocus="autofocus" name="name" id="name">
+            <br>
+            <label for="mail">Email</label>
+            <input type="email" name="mail" id="mail">
+            <br>
+            <div class="row-fluid">
+                <input type="submit" value="Add House">
+                <a href="/" class="button">Home</a>
+            </div>
+        </div>
+    </form>
+
+    {% if houses|length < 1 %}
+    <h4 style="text-align: center">No houses yet. Create one! :)</h4>
+    {% else %}
+    <table>
+        <tr>
+            <th>House</th>
+            <th>Email</th>
+            <th>Action</th>
+        </tr>
+        {% for house in houses %}
+            <tr>
+                <td>{{ house.name }}</td>
+                <td>{{ house.mail }}</td>
+                <td>
+                    <a href="/update_house/{{house.id}}">Edit</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+</div>
+{% endblock %}

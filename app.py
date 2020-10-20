@@ -47,6 +47,15 @@ def load_user(id):
 def unauthorized_callback():
     return redirect('/login')
 
+class House(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    mail = db.Column(db.String(50), nullable=True)
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return '<House {}>'.format(self.id)
+
 class Member(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
@@ -65,7 +74,6 @@ class Member(db.Model):
 
     def get_debt(self):
         return currency_to_string(self.debt)
-        # return str('{0:.3f}'.format(round(self.debt, 3)))
 
     def get_int_debt(self):
         return str(round(self.debt))
@@ -180,6 +188,29 @@ def logout():
 def index():
     members = Member.query.order_by(Member.date_created).all()
     return render_template('index.html', members=members)
+
+@app.route('/add_house/', methods=['GET', 'POST'])
+@login_required
+def add_house():
+    houses = House.query.order_by(House.date_created).all()
+    return render_template('add_house.html', houses=houses)
+
+@app.route('/update_/<int:id>', methods=['GET', 'POST'])
+@login_required
+def update_house(id):
+    house_to_update = House.query.get_or_404(id)
+
+    if request.method == 'POST':
+        house_to_update.name = request.form.get('name')
+        house_to_update.mail = request.form.get('mail')
+
+        try:
+            db.session.commit()
+            return redirect('/')
+        except:
+            return 'There was an issue updating that house.'
+    else:
+        return render_template('update_house.html', house=house_to_update)
 
 def italian_month(num):
     ita_months = {

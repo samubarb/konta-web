@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Update house</title>
+{% endblock %}
+
+{% block body %}
+<div class="update_house">
+    <h2 style="text-align: center">Update house</h2>
+
+    <form action="/update_house/{{house.id}}" method="POST">
+        <div class="col">
+            <label for="name">Name</label>
+            <input type="text" name="name" id="name" value="{{house.name}}">
+            <br>
+            <label for="mail">Email</label>
+            <input type="text" autofocus="autofocus" name="mail" id="mail" value="{{house.mail}}">
+            <br>
+            <div class="row-fluid">
+                <input type="submit" value="Update House">
+                <a href="/add_house/" class="button">Back</a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

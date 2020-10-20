@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-wrk_dir="."
+wrk_dir="${PWD}"
 
 # Entering virtualenv
 echo "Setting up virtualenv..."
